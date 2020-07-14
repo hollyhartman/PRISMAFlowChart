@@ -310,7 +310,7 @@ server <- function(input, output) {
     })
     
     
-    #Text for the number of records identified from the main sourc
+    #Text for the number of records identified from the main source
     numRecs<- reactive({
         #total number of records found
         numRecText <- paste0("Records identified through\\ndatabase searching\\n(n = ", input$databaseSearchNum,")")
@@ -329,25 +329,26 @@ server <- function(input, output) {
         }
         return(numRecText)
     })
+    #Create UI to enter text for detailed source
+    output$input_ui_text <- renderUI({
+        num <- as.integer(input$databaseDet)
+        #create a dynamic number of entries based on user need
+        lapply(1:num, function(i) {
+            textInput(paste0("databaseSourceDet", i), label = paste0("Database source name ", i), value = "")
+        })
+    })
     
+    #Create UI for entering number of records from each detailed source
     output$input_ui <- renderUI({
         num <- as.integer(input$databaseDet)
-        
+        #create a dynamic number of entries based on user need
         lapply(1:num, function(i) {
-            #textInput(paste0("databaseSourceDet", i), label = paste0("Database source ", i), value = "")
             numericInput(paste0("databaseDet", i), label = paste0("# of records from source ", i), value = 1)
         })
     })
     
-    output$input_ui_text <- renderUI({
-        num <- as.integer(input$databaseDet)
-        
-        lapply(1:num, function(i) {
-            textInput(paste0("databaseSourceDet", i), label = paste0("Database source name ", i), value = "")
-            #numericInput(paste0("databaseDet", i), label = paste0("Number of records found from source ", i), value = 1)
-        })
-    })
     
+    #Text for the number of records identified from the other sources
     otherRecs<- reactive({
         numRecText <- paste0("Records identified through\\nother sources\\n(n = ", input$otherNum,")")
         if(input$otherNumDetails){
@@ -363,25 +364,25 @@ server <- function(input, output) {
         return(numRecText)
     })
     
+    #Create UI for number of records from detailed other sources
     output$input_ui_other <- renderUI({
         num <- as.integer(input$otherDet)
         
         lapply(1:num, function(i) {
-            #textInput(paste0("databaseSourceDet", i), label = paste0("Database source ", i), value = "")
             numericInput(paste0("otherDet", i), label = paste0("# of records from other source ", i), value = 1)
         })
     })
     
+    #Create UI for text details on other sources
     output$input_ui_text_other <- renderUI({
         num <- as.integer(input$otherDet)
         
         lapply(1:num, function(i) {
             textInput(paste0("otherSourceDet", i), label = paste0("Other source name ", i), value = "")
-            #numericInput(paste0("databaseDet", i), label = paste0("Number of records found from source ", i), value = 1)
         })
     })
     
-    
+    #Create text for the node for records excluded
     excludeRecs <- reactive({
         numRecText <- paste0("Records excluded\\nother sources\\n(n = ", input$excludeNum,")")
         if(input$excludeNumDetails){
@@ -397,25 +398,25 @@ server <- function(input, output) {
         return(numRecText)
     })
     
+    #Create UI for number of records excluded
     output$input_ui_exclude <- renderUI({
         num <- as.integer(input$excludeDet)
         
         lapply(1:num, function(i) {
-            #textInput(paste0("databaseSourceDet", i), label = paste0("Database source ", i), value = "")
             numericInput(paste0("excludeDet", i), label = paste0("# excluded due to reason ", i), value = 1)
         })
     })
     
+    #Create UI for text details on records excluded
     output$input_ui_text_exclude <- renderUI({
         num <- as.integer(input$excludeDet)
         
         lapply(1:num, function(i) {
             textInput(paste0("excludeSourceDet", i), label = paste0("Record exclusion reason ", i), value = "")
-            #numericInput(paste0("databaseDet", i), label = paste0("Number of records found from source ", i), value = 1)
         })
     })
     
-    
+    #Create node label for full text articles excluded
     fulltextexcludeRecs <- reactive({
         numRecText <- paste0("Full-text articles excluded\\n(n = ", input$fulltextexcludeNum,")")
         if(input$fulltextexcludeNum > 0){
@@ -428,30 +429,31 @@ server <- function(input, output) {
         return(numRecText)
     })
     
+    #Create UI for number of full text articles excluded for each reasons 
     output$input_ui_fulltextexclude <- renderUI({
         num <- as.integer(input$fulltextexcludeDet)
         
         lapply(1:num, function(i) {
-            #textInput(paste0("databaseSourceDet", i), label = paste0("Database source ", i), value = "")
             numericInput(paste0("fulltextexcludeDet", i), label = paste0("# excluded due to reason ", i), value = 1)
         })
     })
     
+    #Create UI for text reasons full text articles excluded
     output$input_ui_text_fulltextexclude <- renderUI({
         num <- as.integer(input$fulltextexcludeDet)
         
         lapply(1:num, function(i) {
             textInput(paste0("fulltextexcludeSourceDet", i), label = paste0("Full text exclusion reason ", i), value = "")
-            #numericInput(paste0("databaseDet", i), label = paste0("Number of records found from source ", i), value = 1)
         })
     })
     
+    #Create download as PDF button
     output$downloadPDF <- downloadHandler(
         filename = function() {
-            paste("diagram.pdf", sep = "")
+            paste("diagram.pdf", sep = "") #save file as diagram.pdf
         },
         content = function(file) {
-            diagram() %>%
+            diagram() %>% #export the grViz file as a pdf
                 export_svg %>% charToRaw %>% rsvg_pdf(file)
             
         }
@@ -459,22 +461,14 @@ server <- function(input, output) {
     
     output$downloadPNG <- downloadHandler(
         filename = function() {
-            paste("diagram.png", sep = "")
+            paste("diagram.png", sep = "") #save file as diagram.png
         },
         content = function(file) {
-            diagram() %>%
+            diagram() %>% #export the grViz file as a png
                 export_svg %>% charToRaw %>% rsvg_png(file)
             
         }
     )
-    # 
-    # output$table <- renderTable({
-    #     num <- as.integer(input$num)
-    #     
-    #     data.frame(lapply(1:num, function(i) {
-    #         input[[paste0("databaseDet", i)]]
-    #     }))
-    # })
 }
 
 shinyApp(ui = ui, server = server)
